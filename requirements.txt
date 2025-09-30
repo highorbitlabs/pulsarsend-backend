@@ -13,3 +13,9 @@ greenlet==3.2.4
 psycopg[binary]==3.2.10 
 pymongo==4.*
 pydantic-settings==2.11.0
+psycopg2-binary
+email-validator
+privy
+requests
+jwt
+cryptography

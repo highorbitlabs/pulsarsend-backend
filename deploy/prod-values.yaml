@@ -38,6 +38,10 @@ secret:
     POSTGRES_URL: " " #ToDo fix
     ACCESS_TOKEN_SECRET_KEY: "UJ&$oE+%dl!):O{L}Di-{o2PNH]aw" #ToDo fix
     ALGORITHM: "HS256"
+    PRIVY_APP_ID: "" #ToDo fix
+    PRIVY_APP_SECRET: "" #ToDo fix
+    PRIVY_API_BASE_URL: "https://api.privy.io"
+    PRIVY_API_TIMEOUT_SECONDS: "10"
 
 
 ingress:

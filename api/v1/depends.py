@@ -9,10 +9,12 @@ from resourse_access.db_session import AsyncSessionLocal
 
 from api.pagination import Pagination
 from core.config import get_app_settings
+from core.integrations.privy import PrivyClient
 
 
 security = HTTPBearer()
 settings = get_app_settings()
+privy_client = PrivyClient(settings)
 
 
 async def get_session() -> AsyncSession:
@@ -22,6 +24,10 @@ async def get_session() -> AsyncSession:
 
 async def get_pagination(offset: int = 0, limit: int = 20) -> Pagination:
     return Pagination(offset=offset, limit=limit)
+
+
+async def get_privy_client() -> PrivyClient:
+    return privy_client
 
 
 async def get_payload_by_access_token(

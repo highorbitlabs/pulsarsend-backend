@@ -5,6 +5,10 @@
 .idea/**/dictionaries
 .idea/**/shelf
 .idea
+.DS_Store
+__pycache__/
+*.py[cod]
+*$py.class
 # AWS User-specific
 .idea/**/aws.xml
 

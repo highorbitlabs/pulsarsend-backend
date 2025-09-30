@@ -30,3 +30,12 @@ class InvalidQueryParamsException(AppException):
 class NotImplementedException(AppException):
     default_message = "Subclasses should implement this"
     default_code = status.HTTP_501_NOT_IMPLEMENTED
+
+
+class ExternalServiceException(AppException):
+    default_message = "External service error"
+    default_code = status.HTTP_502_BAD_GATEWAY
+
+
+class PrivyApiException(ExternalServiceException):
+    default_message = "Privy API request failed"

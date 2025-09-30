@@ -7,6 +7,8 @@ from typing import Tuple
 
 from loguru import logger
 from pydantic import AnyUrl
+from pydantic import AnyHttpUrl
+from pydantic import Field
 
 from core.logging import InterceptHandler
 from core.settings.base import BaseAppSettings
@@ -31,8 +33,20 @@ class AppSettings(BaseAppSettings):
     POSTGRES_URL: PostgresDsn
     SQLALCHEMY_DATABASE_URI: PostgresDsn
 
+    POSTGRES_USER: str = "user"
+    POSTGRES_PASSWORD: str = "password"
+    POSTGRES_HOST: str = "localhost"
+    POSTGRES_PORT: str = "5432"
+    POSTGRES_DB: str = "backoffice_auth_db"
+
     ACCESS_TOKEN_SECRET_KEY: str
     ALGORITHM: str
+
+    PRIVY_APP_ID: str
+    PRIVY_APP_SECRET: str
+    PRIVY_API_BASE_URL: AnyHttpUrl = Field(default="https://api.privy.io")
+    PRIVY_API_TIMEOUT_SECONDS: float = Field(default=10.0, ge=0.1)
+    PRIVY_JWT_VERIFICATION_KEY_PEM: str
 
     api_prefix: str = "/api"
 
@@ -46,11 +60,17 @@ class AppSettings(BaseAppSettings):
     class Config:
         validate_assignment = True
 
-    def get_async_database_url(self) -> str:
-        return str(self.POSTGRES_ASYNC_URL)
-
     def get_database_url(self) -> str:
-        return str(self.POSTGRES_URL)
+        return (
+            f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:"
+            f"{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+        )
+
+    def get_async_database_url(self) -> str:
+        return (
+            f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:"
+            f"{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+        )
 
     def get_sqlalchemy_database_uri(self) -> str:
         return str(self.SQLALCHEMY_DATABASE_URI)
