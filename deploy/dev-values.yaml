@@ -1,0 +1,67 @@
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+domain: vaultz.kg
+
+image:
+  repository:
+  pullPolicy: Always
+  pullSecrets: vaultz-registry-key
+
+# Values: ClusterIP, NodePort, LoadBalancer
+serviceType: ClusterIP
+
+## Ports published to Service and redirected to Pods
+servicePorts:
+  - servicePort: 80
+    containerPort: 8001
+    protocol: TCP
+    name: http
+
+env:
+ ENV: "development"
+ PORT: "8001"
+
+ APP_ENV: "dev"
+
+secret:
+  enabled: true
+  envValues:
+    secret_key: "not_a_secret" 
+    POSTGRES_ASYNC_URL: " " #ToDo fix
+    SQLALCHEMY_DATABASE_URI: " " #ToDo fix
+    POSTGRES_URL: " " #ToDo fix
+    ACCESS_TOKEN_SECRET_KEY: "UJ&$oE+%dl!):O{L}Di-{o2PNH]aw" #ToDo fix
+    ALGORITHM: "HS256"
+    PRIVY_APP_ID: "" #ToDo fix
+    PRIVY_APP_SECRET: "" #ToDo fix
+    PRIVY_API_BASE_URL: "https://api.privy.io"
+    PRIVY_API_TIMEOUT_SECONDS: "10"
+
+
+ingress:
+  enabled: true
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+  rules:
+  - host: api-vaultz-dev.vaultz.kg #ToDo fix
+    http:
+      paths:
+      - backend:
+          service:
+            name: vaultz #ToDo fix
+            port:
+              number: 80
+        path: /vaultz-api/(.*) #ToDo fix
+        pathType: Prefix
+
+
+#serviceMonitor:
+#  enabled: true
+#  port: 8001
+#  interval: 30s
+#  scrapeTimeout: 30s
+#  scheme: http
+#  labels: {}
