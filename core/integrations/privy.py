@@ -29,7 +29,6 @@ class PrivyClient:
             "privy-app-secret": settings.PRIVY_APP_SECRET,
         }
         self._jwks_client = PyJWKClient(settings.PRIVY_JWT_VERIFICATION_KEY_PEM)
-        print(f"PRIVY CLIENTS: , {self._base_url} \n {self._app_id}, \n {settings.PRIVY_APP_SECRET}")
 
 
     async def token_verify(
@@ -53,8 +52,6 @@ class PrivyClient:
             issuer="privy.io",
             options={"require": ["iss", "aud", "exp", "iat", "sub"]},
         )
-        print("claims")
-        print(claims)
 
         return claims
 

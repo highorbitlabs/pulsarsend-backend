@@ -29,15 +29,15 @@ class AppSettings(BaseAppSettings):
     version: str = "0.0.0"
 
     ROOT_PATH: str = ''
-    POSTGRES_ASYNC_URL: PostgresDsn
-    POSTGRES_URL: PostgresDsn
-    SQLALCHEMY_DATABASE_URI: PostgresDsn
+    # POSTGRES_ASYNC_URL: PostgresDsn
+    # POSTGRES_URL: PostgresDsn
+    # SQLALCHEMY_DATABASE_URI: PostgresDsn
 
-    POSTGRES_USER: str = "user"
-    POSTGRES_PASSWORD: str = "password"
-    POSTGRES_HOST: str = "localhost"
-    POSTGRES_PORT: str = "5432"
-    POSTGRES_DB: str = "backoffice_auth_db"
+    # POSTGRES_USER: str = "user"
+    # POSTGRES_PASSWORD: str = "password"
+    # POSTGRES_HOST: str = "localhost"
+    # POSTGRES_PORT: str = "5432"
+    # POSTGRES_DB: str = "backoffice_auth_db"
 
     ACCESS_TOKEN_SECRET_KEY: str
     ALGORITHM: str
@@ -47,6 +47,10 @@ class AppSettings(BaseAppSettings):
     PRIVY_API_BASE_URL: AnyHttpUrl = Field(default="https://api.privy.io")
     PRIVY_API_TIMEOUT_SECONDS: float = Field(default=10.0, ge=0.1)
     PRIVY_JWT_VERIFICATION_KEY_PEM: str
+    
+    SUPABASE_ID: str
+    SUPABASE_KEY: str
+    SUPABASE_DB_CODE: str
 
     api_prefix: str = "/api"
 
@@ -62,14 +66,12 @@ class AppSettings(BaseAppSettings):
 
     def get_database_url(self) -> str:
         return (
-            f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:"
-            f"{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
-        )
+            f"postgresql://postgres.{self.SUPABASE_ID}:{self.SUPABASE_DB_CODE}@aws-1-eu-central-1.pooler.supabase.com:6543/postgres"    
+            )
 
     def get_async_database_url(self) -> str:
         return (
-            f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:"
-            f"{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+            f"postgresql+asyncpg://postgres.{self.SUPABASE_ID}:{self.SUPABASE_DB_CODE}@aws-1-eu-central-1.pooler.supabase.com:6543/postgres"
         )
 
     def get_sqlalchemy_database_uri(self) -> str:

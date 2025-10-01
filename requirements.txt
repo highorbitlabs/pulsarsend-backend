@@ -19,3 +19,4 @@ privy
 requests
 cryptography
 PyJWT 
+supabase
