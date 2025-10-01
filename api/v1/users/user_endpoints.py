@@ -19,9 +19,10 @@ async def get_current_user_by_access_token(
 
 
 
-# @router.get("/user/balance")
-# async def get_user_balance(
-#     privy_id: str = Depends(get_privy_id_from_token),
-# ) -> UserDetailSchema:
-#         return await get_user_balance_usecase(privy_id=privy_id)
+@router.get("/user/balance")
+async def get_user_balance(
+    privy_id: str = Depends(get_privy_id_from_token),
+) -> dict:
+        balance = await get_user_balance_usecase(privy_id=privy_id)
+        return {"balance": balance}
 

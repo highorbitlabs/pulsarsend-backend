@@ -1,4 +1,5 @@
 import base64
+from typing import Any, Dict, List
 import requests
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -28,17 +29,71 @@ async def check_user_usecase(privy_id: str, db_session: AsyncSession):
         return user
     
   
-# async def get_user_balance_usecase(privy_id: str):
-#     basic = base64.b64encode(f"{settings.PRIVY_APP_ID}:{settings.PRIVY_APP_SECRET}".encode()).decode()
-#     headers = {   #ToDo fix, use Builder Pattern
-#         "Authorization": f"Basic {basic}",
-#         "privy-app-id": settings.PRIVY_APP_ID  
-#     }
+async def get_user_balance_usecase(privy_id: str):
+    wallets = await get_user_wallets(privy_id=privy_id)
+    balance = await sum_wallets_usd(wallets)
 
-#     response = requests.get("https://api.privy.io/v1/users", headers=headers).json()
-#     user = await mapResponseToUserCreateSchema(response)
-#     return await user_engine.create_user(user=user)
+    return balance
 
+
+
+async def get_user_wallets(privy_id:str):
+    url = "https://api.privy.io/v1/wallets"
+    basic = base64.b64encode(f"{settings.PRIVY_APP_ID}:{settings.PRIVY_APP_SECRET}".encode()).decode()
+
+
+    response = requests.get(
+        url,
+        headers={
+            "Authorization": f"Basic {basic}",
+            "privy-app-id": settings.PRIVY_APP_ID,
+        },
+        params={"user_id": privy_id},
+        timeout=15
+    )
+    wallets = await extract_ids(response.json())
+    return wallets
+
+async def extract_ids(payload: Dict[str, Any]) -> List[str]:
+
+    data = payload.get("data", [])
+    return [item["id"] for item in data if isinstance(item, dict) and "id" in item]
+
+import base64, requests
+from typing import Iterable
+
+async def sum_wallets_usd(wallet_ids: Iterable[str]):
+    total = 0.0
+    basic = base64.b64encode(
+        f"{settings.PRIVY_APP_ID}:{settings.PRIVY_APP_SECRET}".encode()
+    ).decode()
+
+    headers = {
+        "Authorization": f"Basic {basic}",
+        "privy-app-id": settings.PRIVY_APP_ID,
+    }
+
+    # repeat params as tuples
+    chains = ["ethereum"] # "base", "polygon", "solana"
+    assets = ["eth", "usdc", "usdt"] 
+
+    for wid in wallet_ids:
+        url = f"https://api.privy.io/v1/wallets/{wid}/balance"
+
+        params = [("include_currency", "usd")]
+        params += [("chain", c) for c in chains]
+        params += [("asset", a) for a in assets]
+
+        resp = requests.get(url, headers=headers, params=params, timeout=15)
+        resp.raise_for_status()
+
+        data = resp.json()
+        for bal in data.get("balances", []):
+            usd_value = bal.get("display_values", {}).get("usd")
+            if usd_value:
+                total += float(usd_value)
+
+    return total
 
 
 async def mapResponseToUserCreateSchema(data: dict):
