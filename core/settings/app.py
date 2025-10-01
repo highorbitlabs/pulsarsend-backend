@@ -66,12 +66,12 @@ class AppSettings(BaseAppSettings):
 
     def get_database_url(self) -> str:
         return (
-            f"postgresql://postgres.{self.SUPABASE_ID}:{self.SUPABASE_DB_CODE}@aws-1-eu-central-1.pooler.supabase.com:6543/postgres"    
+            f"postgresql://postgres.{self.SUPABASE_ID}:{self.SUPABASE_DB_CODE}@aws-1-eu-central-1.pooler.supabase.com:5432/postgres"    
             )
 
     def get_async_database_url(self) -> str:
         return (
-            f"postgresql+asyncpg://postgres.{self.SUPABASE_ID}:{self.SUPABASE_DB_CODE}@aws-1-eu-central-1.pooler.supabase.com:6543/postgres"
+            f"postgresql+asyncpg://postgres.{self.SUPABASE_ID}:{self.SUPABASE_DB_CODE}@aws-1-eu-central-1.pooler.supabase.com:5432/postgres"
         )
 
     def get_sqlalchemy_database_uri(self) -> str:

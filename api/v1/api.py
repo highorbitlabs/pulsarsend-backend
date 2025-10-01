@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from api.v1.auth_endpoints.auth import router as auth_router
+from api.v1.auth.auth_endpoints import router as auth_router
 
 
 # Mount feature routers here as the API surface expands.

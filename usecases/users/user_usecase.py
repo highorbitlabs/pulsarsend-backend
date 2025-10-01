@@ -21,27 +21,34 @@ async def check_user_usecase(privy_id: str, db_session: AsyncSession):
             "privy-app-id": settings.PRIVY_APP_ID  
         }
 
-        response = requests.get("https://api.privy.io/v1/users", headers=headers).json()
+        response = requests.get(f"https://api.privy.io/v1/users/{privy_id}", headers=headers).json()
         user = await mapResponseToUserCreateSchema(response)
         return await user_engine.create_user(user=user)
     else:
         return user
     
-async def mapResponseToUserCreateSchema(response: dict):
+  
+# async def get_user_balance_usecase(privy_id: str):
+#     basic = base64.b64encode(f"{settings.PRIVY_APP_ID}:{settings.PRIVY_APP_SECRET}".encode()).decode()
+#     headers = {   #ToDo fix, use Builder Pattern
+#         "Authorization": f"Basic {basic}",
+#         "privy-app-id": settings.PRIVY_APP_ID  
+#     }
+
+#     response = requests.get("https://api.privy.io/v1/users", headers=headers).json()
+#     user = await mapResponseToUserCreateSchema(response)
+#     return await user_engine.create_user(user=user)
+
+
+
+async def mapResponseToUserCreateSchema(data: dict):
     """Map Privy API user response -> UserCreateSchema""" #ToDo refactor like JavaMapper
-    data = response.get("data", [])
-    if not data:
-        raise ValueError("Response does not contain any user data")
-
-    user_data = data[0]
-
-    privy_id = user_data.get("id")
 
     # Initialize fields
     email = None
     avatar_url = None
 
-    for acc in user_data.get("linked_accounts", []):
+    for acc in data.get("linked_accounts", []):
         if acc.get("type") == "email" and not email:
             email = acc.get("address")
         elif acc.get("type") == "farcaster":

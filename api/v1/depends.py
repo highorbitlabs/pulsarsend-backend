@@ -7,11 +7,13 @@ from jose import jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 from jwt import PyJWKClient
 
+from engines.user_engine import UserEngines
 from resourse_access.db_session import AsyncSessionLocal
 
 from api.pagination import Pagination
 from core.config import get_app_settings
 from core.integrations.privy import PrivyClient
+from schemas.user_schemas import UserDetailSchema
 
 
 security = HTTPBearer()
@@ -77,3 +79,33 @@ async def get_privy_id_from_token(
         raise HTTPException(status_code=401, detail='Access token expired')
     except jwt.JWTError as e:
         raise HTTPException(status_code=401, detail=str(e))
+
+
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Security(security),
+    session=Depends(get_session),
+) -> UserDetailSchema:
+    current_access_token = credentials.credentials
+    try:
+        signing_key = _jwk_client.get_signing_key_from_jwt(current_access_token).key
+
+        payload = jwt.decode(
+            current_access_token,
+            signing_key,
+            algorithms=[settings.ALGORITHM],
+            audience=settings.PRIVY_APP_ID,  
+            issuer="privy.io",
+            options={"require": ["iss", "aud", "exp", "iat", "sub"]},
+        )
+
+        if payload.get("sub"):
+            user_engine = UserEngines(session)
+            privy_id = payload.get("sub").split(":")[-1]
+            return await user_engine.get_user_by_privy_id(privy_id=privy_id)
+        
+        raise HTTPException(status_code=401, detail='Access token expired')
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail='Access token expired')
+    except jwt.JWTError as e:
+        raise HTTPException(status_code=401, detail=str(e))
+
