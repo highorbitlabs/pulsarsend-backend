@@ -28,8 +28,7 @@ class CurrentUser(BaseModel):
     id: int
     privy_id: str
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserCreateSchema(BaseModel):
@@ -42,5 +41,4 @@ class UserCreateSchema(BaseModel):
     gender: Optional[GenderEnum] = None
     avatar_url: Optional[str] = None
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)

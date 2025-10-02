@@ -15,7 +15,7 @@ router = APIRouter(prefix="/user", tags=["user"])
 async def get_current_user_by_access_token(
     user: str = Depends(get_current_user),
 ) -> UserDetailSchema:
-        return await user
+        return user
 
 
 
