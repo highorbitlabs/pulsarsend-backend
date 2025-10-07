@@ -12,7 +12,7 @@ from resourse_access.db_session import AsyncSessionLocal
 
 from api.pagination import Pagination
 from core.config import get_app_settings
-from core.integrations.privy import PrivyClient
+from core.integrations.privy_client import PrivyClient
 from schemas.user_schemas import UserDetailSchema
 
 

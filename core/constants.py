@@ -1,0 +1,2 @@
+BASE_CHAIN = "base"
+BASE_TRANSACTIONS_AVAILABLE_ASSETS = ["usdc", "usdt"]

@@ -8,7 +8,7 @@ from api.v1.depends import get_privy_client
 from api.v1.depends import get_privy_id_from_token
 from api.v1.depends import get_session
 
-from core.integrations.privy import PrivyClient
+from core.integrations.privy_client import PrivyClient
 
 from schemas.auth_schemas import TokenVerifyRequest
 from schemas.auth_schemas import TokenVerifyResponse

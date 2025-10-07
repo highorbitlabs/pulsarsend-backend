@@ -42,3 +42,15 @@ class UserCreateSchema(BaseModel):
     avatar_url: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserWalletsSchema(BaseModel):
+    wallet_id: Optional[str]
+    chain_type: Optional[str] = None
+    policy_ids: Optional[list] = None
+    additional_signers: Optional[list] = None
+    created_at: Optional[int] = None
+    exported_at: Optional[int] = None
+    imported_at: Optional[int] = None
+
+    model_config = ConfigDict(from_attributes=True)

@@ -2,14 +2,20 @@ import base64
 from typing import Any, Dict, List
 import requests
 from sqlalchemy.ext.asyncio import AsyncSession
+import asyncio
+from core.constants import BASE_CHAIN, BASE_TRANSACTIONS_AVAILABLE_ASSETS
+from schemas.user_schemas import UserWalletsSchema
+
 
 from engines.user_engine import UserEngines
 from core.config import get_app_settings
 from schemas.enums import UserRoleEnum
 from schemas.user_schemas import UserCreateSchema
+from core.integrations.privy_client import PrivyClient
 
 
 settings = get_app_settings()
+privy_client = PrivyClient(settings)
 
 async def check_user_usecase(privy_id: str, db_session: AsyncSession):
     user_engine = UserEngines(db_session)
@@ -30,14 +36,49 @@ async def check_user_usecase(privy_id: str, db_session: AsyncSession):
     
   
 async def get_user_balance_usecase(privy_id: str):
-    wallets = await get_user_wallets(privy_id=privy_id)
+    wallets = await get_user_wallets_list(privy_id=privy_id)
     balance = await sum_wallets_usd(wallets)
 
     return balance
 
 
+async def get_user_wallets_usecase(privy_id: str) -> List[UserWalletsSchema]:
+    result = await privy_client.list_wallets(user_id=privy_id)
+    wallets = map_wallets(result)
+    return wallets
+    
 
-async def get_user_wallets(privy_id:str):
+async def get_user_transactions_usecase(privy_user_id: str) -> List[Dict[str, Any]]:
+    wallet_ids = await get_user_wallets_list(privy_user_id)
+
+    tasks = [
+        privy_client.get_transactions(
+            wallet_id=wid,
+            chain=BASE_CHAIN,
+            asset=BASE_TRANSACTIONS_AVAILABLE_ASSETS
+        )
+        for wid in wallet_ids
+    ]
+
+    # Run all requests in parallel
+    results = await asyncio.gather(*tasks)
+
+    # Collect all transactions from results
+    all_transactions: List[Dict[str, Any]] = []
+    for result in results:
+        transactions = result.get("transactions", []) or []
+        all_transactions.extend(transactions)
+
+    # Sort by creation time (newest first)
+    all_transactions.sort(
+        key=lambda tx: int(tx.get("created_at", 0)),
+        reverse=True
+    )
+
+    return all_transactions
+    
+
+async def get_user_wallets_list(privy_id:str):
     url = "https://api.privy.io/v1/wallets"
     basic = base64.b64encode(f"{settings.PRIVY_APP_ID}:{settings.PRIVY_APP_SECRET}".encode()).decode()
 
@@ -119,5 +160,17 @@ async def mapResponseToUserCreateSchema(data: dict):
 
     return user
 
-        
+def map_wallets(payload: Dict[str, Any]) -> List[UserWalletsSchema]:
+    wallets = []
+    for item in payload.get("data", []) or []:
+        wallets.append(UserWalletsSchema(
+            wallet_id=item.get("id"),
+            chain_type=item.get("chain_type"),
+            policy_ids=item.get("policy_ids"),
+            additional_signers=item.get("additional_signers"),
+            created_at=item.get("created_at"),
+            exported_at=item.get("exported_at"),
+            imported_at=item.get("imported_at"),
+        ))
+    return wallets
         
