@@ -10,6 +10,16 @@ from core.config import get_app_settings
 settings = get_app_settings()
 
 async_engine = create_async_engine(settings.get_async_database_url())
+
+async_engine = create_async_engine(
+    settings.get_async_database_url(),
+    pool_pre_ping=True,                 
+    pool_recycle=300,                   
+    max_overflow=0,                     
+    pool_size=5,                        
+    connect_args={"statement_cache_size": 0},
+)
+
 AsyncSessionLocal = sessionmaker(
     bind=async_engine, expire_on_commit=False, class_=AsyncSession
 )
