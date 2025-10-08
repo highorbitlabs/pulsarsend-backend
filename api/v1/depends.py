@@ -109,3 +109,7 @@ async def get_current_user(
     except jwt.JWTError as e:
         raise HTTPException(status_code=401, detail=str(e))
 
+async def require_bearer_token(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+) -> str:
+    return credentials.credentials

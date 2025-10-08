@@ -20,3 +20,4 @@ requests
 cryptography
 PyJWT 
 supabase
+firebase-admin

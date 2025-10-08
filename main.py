@@ -10,11 +10,13 @@ from api.errors.validation_error import http422_error_handler
 from api.v1.api import v1_router
 from core.config import get_app_settings
 from utils.common_exceptions import AppException
+from core.integrations.firebase_admin import init_firebase
 
 
 def get_application() -> FastAPI:
     settings = get_app_settings()
     settings.configure_logging()
+    init_firebase()
 
     application = FastAPI(**settings.fastapi_kwargs)
 

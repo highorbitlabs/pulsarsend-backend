@@ -5,9 +5,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import asyncio
 from core.constants import BASE_CHAIN, BASE_TRANSACTIONS_AVAILABLE_ASSETS
 from schemas.user_schemas import UserWalletsSchema
+from schemas.notification_schemas import CreateDeviceSchema
 
 
 from engines.user_engine import UserEngines
+from engines.notification_engine import NotificationEngines
 from core.config import get_app_settings
 from schemas.enums import UserRoleEnum
 from schemas.user_schemas import UserCreateSchema
@@ -40,6 +42,17 @@ async def get_user_balance_usecase(privy_id: str):
     balance = await sum_wallets_usd(wallets)
 
     return balance
+  
+async def create_user_device_usecase(device: CreateDeviceSchema, db_session: AsyncSession):
+    notification_engine = NotificationEngines(db_session)
+    device = await notification_engine.register_token(
+        user_id=device.user_id,
+        fcm_token=device.fcm_token,
+        platform=device.platform,
+        app_version=device.app_version,
+        locale=device.locale
+        )
+    return device
 
 
 async def get_user_wallets_usecase(privy_id: str) -> List[UserWalletsSchema]:

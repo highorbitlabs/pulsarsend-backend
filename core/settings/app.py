@@ -52,6 +52,9 @@ class AppSettings(BaseAppSettings):
     SUPABASE_KEY: str
     SUPABASE_DB_CODE: str
 
+    FIREBASE_CREDENTIALS_PATH: str
+    FIREBASE_ENABLED: bool
+
     api_prefix: str = "/api"
 
     jwt_token_prefix: str = "Token"
