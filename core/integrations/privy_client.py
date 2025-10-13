@@ -3,8 +3,9 @@ from typing import Any, Dict, Optional, Sequence, Union
 
 import httpx
 
-from core.integrations.privy import PrivyRequestBuilder
-from core.integrations.privy import PrivyRequest
+from core.constants import USD
+from utils.privy_request_builder import PrivyRequestBuilder
+from utils.privy_request_builder import PrivyRequest
 from core.settings.app import AppSettings
 from utils.common_exceptions import PrivyApiException
 
@@ -32,7 +33,7 @@ class PrivyClient:
             .with_json({"token": token})
             .build()
         )
-
+        print(request)
         return await self._send(request)
 
     async def list_wallets(
@@ -41,7 +42,7 @@ class PrivyClient:
         cursor: Optional[str] = None,
         limit: Optional[int] = None,
         chain_type: Optional[str] = None,
-        user_id: Optional[str] = None,
+        privy_id: Optional[str] = None,
     ) -> Dict[str, Any]:
         params: Dict[str, Any] = {}
 
@@ -53,8 +54,8 @@ class PrivyClient:
             params["limit"] = limit
         if chain_type is not None:
             params["chain_type"] = chain_type
-        if user_id is not None:
-            params["user_id"] = user_id
+        if privy_id is not None:
+            params["user_id"] = privy_id
 
         builder = (
             PrivyRequestBuilder(self._base_url, self._headers, self._timeout)
@@ -66,6 +67,19 @@ class PrivyClient:
             builder = builder.with_params(params)
 
         request = builder.build()
+
+        return await self._send(request)
+
+    async def get_user_by_privy_id(self, *, privy_id: str) -> Dict[str, Any]:
+        if not privy_id:
+            raise ValueError("privy_user_id is required")
+
+        request = (
+            PrivyRequestBuilder(self._base_url, self._headers, self._timeout)
+            .with_method("GET")
+            .with_path(f"v1/users/{privy_id}")
+            .build()
+        )
 
         return await self._send(request)
 
@@ -114,6 +128,63 @@ class PrivyClient:
             .with_path(f"v1/wallets/{wallet_id}/transactions")
             .with_params(params)
         )
+
+        request = builder.build()
+
+        return await self._send(request)
+
+    async def get_wallet_balance(
+        self,
+        *,
+        wallet_id: str,
+        include_currency: Optional[str] = USD,
+        chain: Optional[Union[str, Sequence[str]]] = None,
+        asset: Optional[Union[str, Sequence[str]]] = None,
+    ) -> Dict[str, Any]:
+        if not wallet_id:
+            raise ValueError("wallet_id is required")
+
+        params: Dict[str, Any] = {}
+
+        if include_currency is not None:
+            if not include_currency:
+                raise ValueError("include_currency must not be empty")
+            params["include_currency"] = include_currency
+
+        if chain is not None:
+            if isinstance(chain, str):
+                if not chain:
+                    raise ValueError("chain must not be empty")
+                params["chain"] = chain
+            else:
+                chain_list = [value for value in chain if value]
+                if any(not isinstance(value, str) for value in chain_list):
+                    raise ValueError("chain values must be strings")
+                if not chain_list:
+                    raise ValueError("chain must contain at least one value")
+                params["chain"] = chain_list
+
+        if asset is not None:
+            if isinstance(asset, str):
+                if not asset:
+                    raise ValueError("asset must not be empty")
+                params["asset"] = asset
+            else:
+                asset_list = [value for value in asset if value]
+                if any(not isinstance(value, str) for value in asset_list):
+                    raise ValueError("asset values must be strings")
+                if not asset_list:
+                    raise ValueError("asset must contain at least one value")
+                params["asset"] = asset_list
+
+        builder = (
+            PrivyRequestBuilder(self._base_url, self._headers, self._timeout)
+            .with_method("GET")
+            .with_path(f"v1/wallets/{wallet_id}/balance")
+        )
+
+        if params:
+            builder = builder.with_params(params)
 
         request = builder.build()
 

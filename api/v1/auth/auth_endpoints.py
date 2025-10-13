@@ -17,6 +17,7 @@ from schemas.user_schemas import UserDetailSchema
 from schemas.notification_schemas import CreateDeviceSchema
 from usecases.users.user_usecase import check_user_usecase
 from usecases.users.user_usecase import create_user_device_usecase
+from usecases.users.auth_usecase import token_verify_usecase
 
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -24,14 +25,10 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/token/verify", response_model=TokenVerifyResponse)
 async def token_verify(
-    payload: TokenVerifyRequest,
-    privy_client: PrivyClient = Depends(get_privy_client),
+    payload: TokenVerifyRequest
 ) -> TokenVerifyResponse:
-    result = await privy_client.token_verify(
-        token=payload.token,
-    )
-
-    return TokenVerifyResponse.model_validate(result)
+    result = await token_verify_usecase(token=payload.token)
+    return result
 
 
 @router.post("/check/user")

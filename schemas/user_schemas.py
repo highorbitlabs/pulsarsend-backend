@@ -1,6 +1,5 @@
 from datetime import datetime
 from typing import Optional
-from typing import Union
 
 from pydantic import BaseModel, ConfigDict
 
@@ -54,3 +53,7 @@ class UserWalletsSchema(BaseModel):
     imported_at: Optional[int] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+class UserTransactionSchema(BaseModel): #ToDo complete it
+    caip2: str
+
