@@ -20,12 +20,10 @@ async def mapResponseToUserCreateSchema(data: dict) -> UserCreateSchema:
         elif acc.get("type") == "farcaster":
             avatar_url = acc.get("profile_picture_url") or acc.get("profile_picture")
 
-    # Build schema object
     user = UserCreateSchema(
         privy_id=privy_id.split(":")[-1] if privy_id else None,  # strip did:privy:
         email=email,
         avatar_url=avatar_url,
-        role=UserRoleEnum.user if hasattr(UserRoleEnum, "customer") else None,
     )
 
     return user

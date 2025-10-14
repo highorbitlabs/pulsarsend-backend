@@ -33,7 +33,6 @@ class PrivyClient:
             .with_json({"token": token})
             .build()
         )
-        print(request)
         return await self._send(request)
 
     async def list_wallets(

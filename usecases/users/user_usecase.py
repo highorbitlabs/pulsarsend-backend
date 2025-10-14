@@ -22,7 +22,7 @@ async def check_user_usecase(privy_id: str, db_session: AsyncSession):
     user = await user_engine.get_user_by_privy_id_or_none(privy_id=privy_id)
 
     if user == None:
-        response = privy_client.get_user_by_privy_id(privy_id=privy_id)
+        response = await privy_client.get_user_by_privy_id(privy_id=privy_id)
         user = await mapResponseToUserCreateSchema(response)
         return await user_engine.create_user(user=user)
     else:
