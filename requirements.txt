@@ -21,3 +21,4 @@ cryptography
 PyJWT 
 supabase
 firebase-admin
+pytest

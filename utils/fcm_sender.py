@@ -1,3 +1,4 @@
+from datetime import timedelta
 from typing import Dict, Any, List, Tuple, Optional
 from firebase_admin import messaging
 
@@ -11,8 +12,8 @@ class FcmNotificationSender:
             notification=messaging.Notification(title=title, body=body),
             data={k: str(v) for k,v in (data or {}).items()},
             android=messaging.AndroidConfig(priority=("high" if priority=="HIGH" else "normal"),
-                                            ttl=f"{ttl}s"),
-            apns=messaging.ApnsConfig(headers={"apns-priority":"10"}),
+                                            ttl=timedelta(seconds=ttl)),
+            apns=messaging.APNSConfig(headers={"apns-priority": "10"}),
             webpush=messaging.WebpushConfig(headers={"Urgency": "high" if priority=="HIGH" else "normal"}),
         )
         res = messaging.send_each_for_multicast(msg)
