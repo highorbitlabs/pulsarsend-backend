@@ -24,11 +24,12 @@ class NotificationEngines:
     async def send_to_user(self, user_id: int, title: str, body: str,
                      data: Optional[Dict[str, Any]] = None, priority: str = "HIGH", ttl: int = 3600):
         tokens = await self.registry.list_active_tokens(user_id)
-        if not tokens:
+        unique_tokens = list(dict.fromkeys(tokens))
+        if not unique_tokens:
             return {"success": 0, "failure": 0, "deactivated": []}
 
         normalized_priority = priority.upper()
-        results = self.sender.send_to_tokens(tokens, title, body, data or {}, normalized_priority, ttl)
+        results = self.sender.send_to_tokens(unique_tokens, title, body, data or {}, normalized_priority, ttl)
         deactivated = [t for (t, ok, code) in results if not ok and code == "UNREGISTERED"]
         if deactivated:
             await self.registry.deactivate_many(deactivated)
