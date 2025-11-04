@@ -11,7 +11,10 @@ class NotificationEngines:
 
     async def register_token(self, user_id: int, fcm_token: str, platform: str, app_version: Optional[str], locale: Optional[str]):
         device = await self.registry.upsert(user_id, fcm_token, platform, app_version, locale)
+        await self.db.commit()
+        await self.db.refresh(device)
         return device
+
     async def unregister_token(self, user_id: int, token: str):
         self.registry.deactivate(user_id, token)
         self.db.commit()
