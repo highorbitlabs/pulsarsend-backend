@@ -30,3 +30,9 @@ class NotificationPlatformEnum(str, Enum):
     android = "android"
     ios = "ios"
     web = "web"
+
+
+class TransactionEnum(str, Enum):
+    deposit = "deposit"
+    withdraw = "withdraw"
+

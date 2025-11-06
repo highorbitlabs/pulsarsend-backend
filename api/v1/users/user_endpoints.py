@@ -3,14 +3,26 @@ from __future__ import annotations
 from typing import List
 from starlette import status
 
-from fastapi import APIRouter, Depends
-from api.v1.depends import get_current_user, get_privy_id_from_token
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from api.v1.depends import get_current_user, get_privy_id_from_token, get_session
 from schemas.user_schemas import UserDetailSchema, UserWalletsSchema
+from schemas.user_vault_schemas import (
+    UserVaultCreateRequest,
+    UserVaultResponseSchema,
+    UserVaultUpdateRequest,
+)
 
 from usecases.users.user_usecase import (
     get_user_balance_usecase,
     get_user_transactions_usecase,
     get_user_wallets_usecase,
+)
+from usecases.users.user_vault_usecase import (
+    create_user_vault_usecase,
+    get_user_vault_usecase,
+    update_user_vault_usecase,
 )
 
 
@@ -72,5 +84,52 @@ async def get_user_transactions(
                 }
                 }
                 ]
-                
 
+
+@router.post(
+    "/vault",
+    status_code=status.HTTP_201_CREATED,
+    response_model=UserVaultResponseSchema,
+)
+async def create_user_vault(
+    payload: UserVaultCreateRequest,
+    current_user: UserDetailSchema = Depends(get_current_user),
+    db_session: AsyncSession = Depends(get_session),
+) -> UserVaultResponseSchema:
+    return await create_user_vault_usecase(
+        user_id=current_user.id,
+        payload=payload,
+        db_session=db_session,
+    )
+
+
+@router.get(
+    "/vault",
+    status_code=status.HTTP_200_OK,
+    response_model=UserVaultResponseSchema,
+)
+async def get_user_vault(
+    current_user: UserDetailSchema = Depends(get_current_user),
+    db_session: AsyncSession = Depends(get_session),
+) -> UserVaultResponseSchema:
+    return await get_user_vault_usecase(
+        user_id=current_user.id,
+        db_session=db_session,
+    )
+
+
+@router.put(
+    "/vault",
+    status_code=status.HTTP_200_OK,
+    response_model=UserVaultResponseSchema,
+)
+async def update_user_vault(
+    payload: UserVaultUpdateRequest,
+    current_user: UserDetailSchema = Depends(get_current_user),
+    db_session: AsyncSession = Depends(get_session),
+) -> UserVaultResponseSchema:
+    return await update_user_vault_usecase(
+        user_id=current_user.id,
+        payload=payload,
+        db_session=db_session,
+    )
